@@ -47,7 +47,7 @@
         throw `Response ${response.status} from server`;
       }
     })
-    .then(data => console.log('Success: ', data))
-    .catch(error => console.log('Error: ', error));
+    .then(data => alert(data.message))
+    .catch(error => alert('Error: ' + error));
   });
 </script>

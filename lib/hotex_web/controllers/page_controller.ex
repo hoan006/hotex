@@ -16,11 +16,41 @@ defmodule HotexWeb.PageController do
       entries = if is_list(response), do: response, else: [response]
 
       parse_result =
-        Enum.map(entries, &Hotex.Parsers.parse(supplier.parser_code, &1))
-        |> Enum.reject(&is_nil/1)
-        |> IO.inspect()
+        entries
+        |> Enum.map(&Hotex.Parsers.parse(supplier.parser_code, &1))
+        |> Enum.reject(&(&1 == []))
 
-      json(conn, "Added #{length(parse_result)} entries")
+      hotel_attributes =
+        parse_result
+        |> List.flatten()
+        |> Enum.map(fn {hotel_id, destination_id, field, value, score} ->
+          Hotex.Hotels.HotelAttribute.changeset(
+            %Hotex.Hotels.HotelAttribute{},
+            %{
+              hotel_id: hotel_id,
+              destination_id: destination_id |> to_string(),
+              field: field |> to_string(),
+              value: Jason.encode!(value),
+              score: score,
+              supplier_id: supplier.id
+            }
+          )
+          |> Ecto.Changeset.apply_changes()
+          |> Map.take([:hotel_id, :destination_id, :field, :value, :score, :supplier_id])
+          |> Map.merge(%{
+            inserted_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second),
+            updated_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
+          })
+        end)
+
+      Hotex.Repo.insert_all(
+        Hotex.Hotels.HotelAttribute,
+        hotel_attributes,
+        on_conflict: :replace_all,
+        conflict_target: [:hotel_id, :destination_id, :supplier_id, :field]
+      )
+
+      json(conn, %{message: "#{length(parse_result)} entries added"})
     else
       {code, _} ->
         conn

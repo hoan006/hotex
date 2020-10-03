@@ -6,7 +6,7 @@ defmodule Hotex.Repo.Migrations.CreateHotelAttributes do
       add :hotel_id, :string
       add :destination_id, :string
       add :field, :string
-      add :value, :map
+      add :value, :text
       add :score, :integer, default: 0
       add :supplier_id, references(:suppliers, on_delete: :nothing)
 
