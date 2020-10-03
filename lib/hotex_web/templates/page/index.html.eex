@@ -1,0 +1,53 @@
+<section class="phx-hero">
+  <h1><%= gettext "Welcome to %{name}!", name: "Hotex" %></h1>
+  <p>Where <u>Hot</u>el meets <u>E</u>li<u>x</u>ir.</p>
+</section>
+
+<section class="row">
+  <article class="column">
+    <h2>Hotel Supplier Input</h2>
+      <%= for supplier <- @suppliers do %>
+        <form action="/api/hotels/add" method="POST">
+          <label for="supplier<%= supplier.id %>"><%= supplier.name %></label>
+          <input type="hidden" name="supplier_id" value="<%= supplier.id %>" />
+          <input type="text" name="url" value="<%= supplier.sample_input %>" id="supplier<%= supplier.id %>" />
+          <button type="submit" style="margin-bottom: 30px">Add</button>
+        </form>
+      <% end %>
+  </article>
+  <article class="column">
+    <h2>Hotel Supplier Query</h2>
+    <ul>
+      <li>
+        <a href="https://elixirforum.com/c/phoenix-forum">Forum</a>
+      </li>
+      <li>
+        <a href="https://webchat.freenode.net/?channels=elixir-lang">#elixir-lang on Freenode IRC</a>
+      </li>
+      <li>
+        <a href="https://twitter.com/elixirphoenix">Twitter @elixirphoenix</a>
+      </li>
+    </ul>
+  </article>
+</section>
+
+<script type="text/javascript">
+  document.addEventListener('submit', e => {
+    const form = e.target;
+    e.preventDefault();
+
+    fetch(form.action, {
+      method: form.method,
+      body: new FormData(form)
+    })
+    .then(response => {
+      if (response.status === 200) {
+        return response.json();
+      } else {
+        throw `Response ${response.status} from server`;
+      }
+    })
+    .then(data => console.log('Success: ', data))
+    .catch(error => console.log('Error: ', error));
+  });
+</script>
