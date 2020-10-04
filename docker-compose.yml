@@ -1,0 +1,16 @@
+version: '2'
+services:
+  hotex:
+    container_name: hotex
+    build:
+      context: .
+      args:
+        - SECRET_KEY_BASE=K68ko8ZLj5sJNoWLDLphomBafI8oCT9GuY6xlAShQPLjv523CZtI/80XAMtvHHFa
+        - DATABASE_URL=postgres://postgres@host.docker.internal:5432/hotex_prod
+    ports:
+      - '4000:4000'
+    environment:
+      - HOST=localhost
+      - PORT=4000
+      - SECRET_KEY_BASE=K68ko8ZLj5sJNoWLDLphomBafI8oCT9GuY6xlAShQPLjv523CZtI/80XAMtvHHFa
+      - DATABASE_URL=postgres://postgres@host.docker.internal:5432/hotex_prod
