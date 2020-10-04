@@ -17,23 +17,22 @@
   </article>
   <article class="column">
     <h2>Hotel Supplier Query</h2>
-    <ul>
-      <li>
-        <a href="https://elixirforum.com/c/phoenix-forum">Forum</a>
-      </li>
-      <li>
-        <a href="https://webchat.freenode.net/?channels=elixir-lang">#elixir-lang on Freenode IRC</a>
-      </li>
-      <li>
-        <a href="https://twitter.com/elixirphoenix">Twitter @elixirphoenix</a>
-      </li>
-    </ul>
+    <form action="/api/hotels/find" method="GET">
+      <label for="hotel_id">Hotel ID(s) - Separated by comma</label>
+      <input type="text" name="hotel_id" id="hotel_id" />
+      <label for="destination_id">Destination ID</label>
+      <input type="text" name="destination_id" id="destination_id" />
+      <label for="q">Containing Text</label>
+      <input type="text" name="q" id="q" />
+      <button type="submit">Find hotels</button>
+    </form>
   </article>
 </section>
 
 <script type="text/javascript">
   document.addEventListener('submit', e => {
-    const form = e.target;
+    var form = e.target;
+    if (form.method === 'get') return true;
     e.preventDefault();
 
     fetch(form.action, {

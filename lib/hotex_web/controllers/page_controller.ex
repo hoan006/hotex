@@ -106,8 +106,34 @@ defmodule HotexWeb.PageController do
       |> where_if(
         params["hotel_id"] not in [nil, ""],
         [h],
-        h.hotel_id in ^String.split(params["hotel_id"], ",")
+        h.hotel_id in ^(params["hotel_id"] |> String.split(",") |> Enum.map(&String.trim/1))
       )
+
+    q = String.trim(params["q"] || "")
+
+    {query, overridden_value_map} =
+      if q != "" do
+        overridden_value_map =
+          from(a in Hotex.Hotels.HotelAttribute,
+            where: ilike(a.value, ^"%#{String.replace(q, "%", "\\%")}%"),
+            distinct: [:hotel_id, :field],
+            order_by: [desc: :score]
+          )
+          |> Hotex.Repo.all()
+          |> Enum.reduce(%{}, fn attribute, acc ->
+            Map.update(
+              acc,
+              attribute.hotel_id,
+              %{attribute.field => attribute.value},
+              &Map.put(&1, attribute.field, attribute.value)
+            )
+          end)
+
+        query = query |> where([h], h.hotel_id in ^Map.keys(overridden_value_map))
+        {query, overridden_value_map}
+      else
+        {query, %{}}
+      end
 
     total = query |> Hotex.Repo.aggregate(:count)
 
@@ -115,6 +141,11 @@ defmodule HotexWeb.PageController do
       from(h in query, limit: ^limit, offset: ^offset)
       |> Hotex.Repo.all()
       |> Enum.map(&Map.drop(&1, [:__struct__, :__meta__]))
+      |> Enum.map(fn datum ->
+        Enum.reduce(overridden_value_map[datum.hotel_id] || %{}, datum, fn {field, value}, acc ->
+          Map.put(acc, field, Jason.decode!(value))
+        end)
+      end)
 
     json(conn, %{data: data, count: length(data), total: total, limit: limit, offset: offset})
   end
