@@ -23,6 +23,7 @@ defmodule HotexWeb.Router do
     pipe_through :api
 
     post "/hotels/add", PageController, :add_hotels
+    get "/hotels/find", PageController, :find_hotels
   end
 
   # Other scopes may use custom stacks.
