@@ -96,12 +96,24 @@ defmodule HotexWeb.PageController do
         _ -> 0
       end
 
+    destination_id = params["destination_id"]
+
+    destination_id =
+      if destination_id in [nil, ""] do
+        nil
+      else
+        case Integer.parse(destination_id) do
+          {destination_id, _} -> destination_id
+          _ -> -1
+        end
+      end
+
     query =
       from(h in Hotex.Hotels.Hotel, [])
       |> where_if(
-        params["destination_id"] not in [nil, ""],
+        not is_nil(destination_id),
         [h],
-        h.destination_id == ^params["destination_id"]
+        h.destination_id == ^destination_id
       )
       |> where_if(
         params["hotel_id"] not in [nil, ""],
@@ -111,6 +123,7 @@ defmodule HotexWeb.PageController do
 
     q = String.trim(params["q"] || "")
 
+    # For text search, the search string may appear in attributes who are not part of hotels due to lower score
     {query, overridden_value_map} =
       if q != "" do
         overridden_value_map =
