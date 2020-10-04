@@ -49,5 +49,5 @@ defmodule Hotex.Parsers.Green do
   end
 
   # No conditions from the sample yet
-  def parse_booking_conditions(entry), do: []
+  def parse_booking_conditions(_entry), do: []
 end

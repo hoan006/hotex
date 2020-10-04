@@ -20,16 +20,19 @@ defmodule Hotex.Parsers do
         images: {:parse_images, :score_images},
         booking_conditions: {:parse_booking_conditions, :score_booking_conditions}
       ]
-      |> Enum.reduce([], fn {field, {parse_func, score_func}}, acc ->
-        value = apply(parser, parse_func, [entry])
-        score = apply(__MODULE__, score_func, [value])
+      |> Enum.reduce(
+        [{hotel_id, :destination_id, destination_id, 1}],
+        fn {field, {parse_func, score_func}}, acc ->
+          value = apply(parser, parse_func, [entry])
+          score = apply(__MODULE__, score_func, [value])
 
-        if score > 0 do
-          [{hotel_id, destination_id, field, value, score} | acc]
-        else
-          acc
+          if score > 0 do
+            [{hotel_id, field, value, score} | acc]
+          else
+            acc
+          end
         end
-      end)
+      )
     else
       _ -> []
     end
