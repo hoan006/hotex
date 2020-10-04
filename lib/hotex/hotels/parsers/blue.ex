@@ -34,7 +34,7 @@ defmodule Hotex.Parsers.Blue do
         Enum.into(image_map, %{}, fn {category, images} ->
           {category,
            images
-           |> Enum.map(&%{link: &1["link"], description: &1["description"] |> trim()})
+           |> Enum.map(&%{link: &1["link"], description: &1["caption"] |> trim()})
            |> Enum.reject(&(&1.link in [nil, ""]))}
         end)
 
